@@ -16,8 +16,24 @@ class ViewController: UIViewController, UITableViewDataSource {
         super.viewDidLoad()
 
         tableView.dataSource = self
+        navigationController?.navigationBar.prefersLargeTitles = true
+        
         fetchPosts()
 
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the index path for the selected row.
+        // `indexPathForSelectedRow` returns an optional `indexPath`, so we'll unwrap it with a guard.
+        guard let selectedIndexPath = tableView.indexPathForSelectedRow else { return }
+
+        // Get the selected movie from the movies array using the selected index path's row
+        let selectedPost = posts[selectedIndexPath.row]
+
+        // Get access to the detail view controller via the segue's destination. (guard to unwrap the optional)
+        guard let detailViewController = segue.destination as? DetailViewController else { return }
+
+        detailViewController.post = selectedPost
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -38,6 +54,17 @@ class ViewController: UIViewController, UITableViewDataSource {
 
         return cell
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // Get the index path of the currently selected row
+        if let selectedIndexPath = tableView.indexPathForSelectedRow {
+            // Deselect the row with animation
+            tableView.deselectRow(at: selectedIndexPath, animated: true)
+        }
+    }
+
 
     func fetchPosts() {
         let url = URL(string: "https://api.tumblr.com/v2/blog/humansofnewyork/posts/photo?api_key=1zT8CiXGXFcQDyMFG7RtcfGLwTdDjFUJnZzKJaWTmgyK4lKGYk")!
